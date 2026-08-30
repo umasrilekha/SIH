@@ -1,0 +1,53 @@
+package com.govmesh.food.soap.config;
+
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.ws.config.annotation.EnableWs;
+import org.springframework.ws.config.annotation.WsConfigurerAdapter;
+import org.springframework.ws.soap.server.endpoint.interceptor.PayloadValidatingInterceptor;
+import org.springframework.ws.transport.http.MessageDispatcherServlet;
+import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;
+import org.springframework.xml.xsd.SimpleXsdSchema;
+import org.springframework.xml.xsd.XsdSchema;
+
+import java.util.List;
+
+@EnableWs
+@Configuration
+public class WebServiceConfig extends WsConfigurerAdapter {
+
+    @Bean
+    public ServletRegistrationBean<MessageDispatcherServlet> messageDispatcherServlet(ApplicationContext applicationContext) {
+        MessageDispatcherServlet servlet = new MessageDispatcherServlet();
+        servlet.setApplicationContext(applicationContext);
+        servlet.setTransformWsdlLocations(true);
+        return new ServletRegistrationBean<>(servlet, "/ws/*");
+    }
+
+    @Bean(name = "food-department")
+    public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema foodDepartmentSchema) {
+        DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
+        wsdl11Definition.setPortTypeName("FoodDepartmentPort");
+        wsdl11Definition.setLocationUri("/ws");
+        wsdl11Definition.setTargetNamespace("http://govmesh.example/food");
+        wsdl11Definition.setSchema(foodDepartmentSchema);
+        return wsdl11Definition;
+    }
+
+    @Bean
+    public XsdSchema foodDepartmentSchema() {
+        return new SimpleXsdSchema(new ClassPathResource("xsd/food-department.xsd"));
+    }
+
+    @Override
+    public void addInterceptors(List<org.springframework.ws.server.EndpointInterceptor> interceptors) {
+        PayloadValidatingInterceptor validatingInterceptor = new PayloadValidatingInterceptor();
+        validatingInterceptor.setValidateRequest(true);
+        validatingInterceptor.setValidateResponse(true);
+        validatingInterceptor.setXsdSchema(foodDepartmentSchema());
+        interceptors.add(validatingInterceptor);
+    }
+}

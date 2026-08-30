@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://govmesh.example/food"
+           targetNamespace="http://govmesh.example/food"
+           elementFormDefault="qualified">
+
+    <!-- UpdateRationAddress Request Element -->
+    <xs:element name="UpdateRationAddress">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ApplicationId" type="xs:string" minOccurs="1"/>
+                <xs:element name="CitizenName" type="xs:string" minOccurs="1"/>
+                <xs:element name="RationCardNo" type="xs:string" minOccurs="1"/>
+                <xs:element name="Address" type="xs:string" minOccurs="1"/>
+                <xs:element name="DistrictCode" type="xs:string" minOccurs="1"/>
+                <xs:element name="TalukaCode" type="xs:string" minOccurs="1"/>
+                <xs:element name="RevenueVerified" type="xs:boolean" minOccurs="1"/>
+                <xs:element name="ConsentId" type="xs:string" minOccurs="1"/>
+                <xs:element name="CorrelationId" type="xs:string" minOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- UpdateRationAddress Response Element -->
+    <xs:element name="UpdateRationAddressResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ApplicationId" type="xs:string" minOccurs="1"/>
+                <xs:element name="Status" type="xs:string" minOccurs="1"/>
+                <xs:element name="Message" type="xs:string" minOccurs="1"/>
+                <xs:element name="CorrelationId" type="xs:string" minOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# Maven build output
+target/
+**/target/
+
+# Vite build output
+dist/
+**/dist/
+
+# Logs
+*.log
+**/logs/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
