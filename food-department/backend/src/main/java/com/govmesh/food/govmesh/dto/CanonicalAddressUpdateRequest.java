@@ -111,11 +111,13 @@ public class CanonicalAddressUpdateRequest {
     public static class VerificationInfo {
         private String status;
         private String source;
+        private Boolean verified;
 
         public VerificationInfo() {}
         public VerificationInfo(String status, String source) {
             this.status = status;
             this.source = source;
+            this.verified = "VALID".equalsIgnoreCase(status) || "VERIFIED".equalsIgnoreCase(status);
         }
 
         public String getStatus() { return status; }
@@ -123,6 +125,9 @@ public class CanonicalAddressUpdateRequest {
 
         public String getSource() { return source; }
         public void setSource(String source) { this.source = source; }
+
+        public Boolean getVerified() { return verified; }
+        public void setVerified(Boolean verified) { this.verified = verified; }
     }
 
     public static class ConsentInfo {

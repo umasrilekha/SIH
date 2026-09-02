@@ -36,7 +36,9 @@ public class FoodDepartmentSchemaMapper {
         }
 
         boolean isRevenueVerified = canonical.getVerification() != null
-                && "VALID".equalsIgnoreCase(canonical.getVerification().getStatus());
+                && ("VALID".equalsIgnoreCase(canonical.getVerification().getStatus())
+                || "VERIFIED".equalsIgnoreCase(canonical.getVerification().getStatus())
+                || Boolean.TRUE.equals(canonical.getVerification().getVerified()));
         soapRequest.setRevenueVerified(isRevenueVerified);
 
         if (canonical.getConsent() != null) {
