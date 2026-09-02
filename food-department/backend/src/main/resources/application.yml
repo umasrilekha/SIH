@@ -27,7 +27,7 @@ spring:
 govmesh:
   food:
     soap:
-      endpoint-url: ${SOAP_ENDPOINT_URL:http://localhost:8081/ws}
+      endpoint-url: ${SOAP_ENDPOINT_URL:http://localhost:${server.port:8081}/ws}
   jwt:
     secret: ${JWT_SECRET:GovMeshFoodDept2026SuperSecretKeyDepartment2Maharashtra2026}
     expiration-ms: ${JWT_EXPIRATION_MS:1800000} # 30 Minutes

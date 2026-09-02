@@ -13,7 +13,7 @@ public class IntegrationRouter {
     private final String defaultSoapEndpointUrl;
 
     public IntegrationRouter(FoodDepartmentAdapter foodDepartmentAdapter,
-                              @Value("${govmesh.food.soap.endpoint-url:http://localhost:8080/ws}") String defaultSoapEndpointUrl) {
+                              @Value("${govmesh.food.soap.endpoint-url:http://localhost:${server.port:8081}/ws}") String defaultSoapEndpointUrl) {
         this.foodDepartmentAdapter = foodDepartmentAdapter;
         this.defaultSoapEndpointUrl = defaultSoapEndpointUrl;
     }
