@@ -133,19 +133,42 @@ docker-compose up --build
 
 ---
 
-## 🚫 Intentionally Not Implemented in Phase 1
+---
 
-As per specification, the following are scheduled for later phases:
-- SOAP / XML / WSDL interfaces (Phase 3)
-- GovMesh Workflow Orchestrator integration
-- REST integration with Revenue Department
-- Consent validation & canonical schema transformation
-- Conflict detection & idempotency handlers
-- Officer approval/rejection workflows (Phase 2)
-- Real citizen Aadhaar/OTP integration
+## 🌐 GovMesh Cloud Interoperability & Deployment
+
+The Food, Civil Supplies & Consumer Protection Department backend is deployed live on Render as a Spring Boot 3 enterprise application providing real-time SOAP/XML and canonical REST interoperability.
+
+* **Production Backend URL**: `https://sih-awaq.onrender.com`
+* **Canonical Interoperability Ingress**: `POST https://sih-awaq.onrender.com/api/govmesh/interoperability/address-update`
+* **SOAP 1.1 WebService Endpoint**: `POST https://sih-awaq.onrender.com/ws`
+* **GovMesh Transactions Feed**: `GET https://sih-awaq.onrender.com/api/govmesh/transactions`
+* **Transaction Tracking**: `GET https://sih-awaq.onrender.com/api/govmesh/transactions/{applicationId}`
+
+### Enterprise Processing Pipeline
+```
+Citizen Portal
+    ↓ (Canonical Request)
+GovMesh Core Engine
+    ↓ (Server-to-Server HTTPS)
+Food Department Adapter
+    ↓ (POST /api/govmesh/interoperability/address-update)
+IntegrationRouter -> FoodDepartmentAdapter
+    ↓ (Jaxb2Marshaller -> SOAP 1.1 XML)
+SOAP WebService Endpoint (/ws -> UpdateRationAddress)
+    ↓
+Ration Card Repository (PostgreSQL / H2) -> Application Master Record
+    ↓
+Canonical Response (200 OK: SUCCESS)
+```
 
 ---
 
-## 🎯 Phase 2 Next Step
+## 🔐 Environment Variables Reference
 
-The architecture and clean separation built in Phase 1 prepare the project for **Phase 2 — Ration Record Management** (implementing officer address update approval/rejection workflows against `ration_records`).
+```bash
+DEPARTMENT_2_API_BASE_URL=https://sih-awaq.onrender.com
+FOOD_API_BASE_URL=https://sih-awaq.onrender.com
+SOAP_ENDPOINT_URL=https://sih-awaq.onrender.com/ws
+SERVER_PORT=8081
+```
