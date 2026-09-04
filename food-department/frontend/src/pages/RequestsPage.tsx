@@ -34,6 +34,10 @@ export const RequestsPage: React.FC = () => {
 
   useEffect(() => {
     fetchRequests();
+    const interval = setInterval(() => {
+      fetchRequests();
+    }, 5000);
+    return () => clearInterval(interval);
   }, [statusFilter, typeFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
