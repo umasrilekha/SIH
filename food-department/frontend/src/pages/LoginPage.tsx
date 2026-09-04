@@ -189,41 +189,53 @@ export const LoginPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-1 text-[11px]">
+            <div className="space-y-1.5 text-[11px]">
               <button
                 type="button"
                 onClick={() => handleDemoFill('food.officer', 'Food@123')}
-                className="w-full p-1.5 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center"
+                className="w-full p-2 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center group cursor-pointer"
               >
-                <span className="font-semibold text-slate-800">Food Supply Officer</span>
-                <span className="font-mono text-slate-500 text-[10px]">food.officer</span>
+                <div>
+                  <div className="font-semibold text-slate-800">Food Supply Officer</div>
+                  <div className="text-[10px] text-slate-500 font-mono">food.officer / Food@123</div>
+                </div>
+                <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition">Auto-fill</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDemoFill('senior.officer', 'Senior@123')}
-                className="w-full p-1.5 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center"
+                className="w-full p-2 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center group cursor-pointer"
               >
-                <span className="font-semibold text-slate-800">Senior Officer</span>
-                <span className="font-mono text-slate-500 text-[10px]">senior.officer</span>
+                <div>
+                  <div className="font-semibold text-slate-800">Senior Officer</div>
+                  <div className="text-[10px] text-slate-500 font-mono">senior.officer / Senior@123</div>
+                </div>
+                <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition">Auto-fill</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDemoFill('food.admin', 'Admin@123')}
-                className="w-full p-1.5 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center"
+                className="w-full p-2 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center group cursor-pointer"
               >
-                <span className="font-semibold text-slate-800">Department Admin</span>
-                <span className="font-mono text-slate-500 text-[10px]">food.admin</span>
+                <div>
+                  <div className="font-semibold text-slate-800">Department Admin</div>
+                  <div className="text-[10px] text-slate-500 font-mono">food.admin / Admin@123</div>
+                </div>
+                <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition">Auto-fill</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDemoFill('auditor', 'Auditor@123')}
-                className="w-full p-1.5 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center"
+                className="w-full p-2 bg-white border border-slate-200 rounded text-left hover:bg-blue-50 hover:border-blue-300 transition flex justify-between items-center group cursor-pointer"
               >
-                <span className="font-semibold text-slate-800">Auditor (Read-Only)</span>
-                <span className="font-mono text-slate-500 text-[10px]">auditor</span>
+                <div>
+                  <div className="font-semibold text-slate-800">Auditor (Read-Only)</div>
+                  <div className="text-[10px] text-slate-500 font-mono">auditor / Auditor@123</div>
+                </div>
+                <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition">Auto-fill</span>
               </button>
             </div>
           </div>
