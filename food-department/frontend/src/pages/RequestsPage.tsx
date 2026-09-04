@@ -13,36 +13,48 @@ import { Search, Filter, RefreshCw, Eye } from 'lucide-react';
 export const RequestsPage: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
 
-  const fetchRequests = async () => {
-    setLoading(true);
-    setError(null);
+  const fetchRequests = async (isBackground = false) => {
+    if (!isBackground) {
+      setLoading(true);
+      setError(null);
+    } else {
+      setIsRefreshing(true);
+    }
     try {
       const data = await applicationService.getApplications(searchQuery, statusFilter, typeFilter);
-      setApplications(data);
+      if (Array.isArray(data)) {
+        setApplications(data);
+      }
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to fetch incoming service requests.');
+      if (!isBackground) {
+        setError(err?.response?.data?.message || 'Failed to fetch incoming service requests.');
+      }
     } finally {
-      setLoading(false);
+      if (!isBackground) {
+        setLoading(false);
+      }
+      setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchRequests();
+    fetchRequests(false);
     const interval = setInterval(() => {
-      fetchRequests();
+      fetchRequests(true);
     }, 5000);
     return () => clearInterval(interval);
   }, [statusFilter, typeFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchRequests();
+    fetchRequests(false);
   };
 
   return (
@@ -57,10 +69,11 @@ export const RequestsPage: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={fetchRequests}
+          onClick={() => fetchRequests(true)}
+          disabled={loading || isRefreshing}
           className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs transition shrink-0"
         >
-          <RefreshCw className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
+          <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-slate-500 ${loading || isRefreshing ? 'animate-spin' : ''}`} />
           Refresh Queue
         </button>
       </div>
