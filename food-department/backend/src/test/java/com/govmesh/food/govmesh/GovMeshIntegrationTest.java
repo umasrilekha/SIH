@@ -177,8 +177,8 @@ public class GovMeshIntegrationTest {
         assertEquals("GM-2026-000124", response.getApplicationId());
         assertEquals("SUCCESS", response.getStatus());
         assertEquals("REQ-2026-000124", response.getCorrelationId());
-        assertEquals("44 Example Road, Shivajinagar, Pune - 411005", sampleRecord.getHouseAddress());
-        assertEquals("APPROVED", sampleApp.getCurrentStatus());
+        assertEquals("PENDING", sampleRecord.getUpdateStatus());
+        assertEquals("PENDING", sampleApp.getCurrentStatus());
 
         verify(transactionRepository, atLeast(2)).save(any(IntegrationTransaction.class));
         verify(auditLogRepository, atLeast(4)).save(any(AuditLog.class));

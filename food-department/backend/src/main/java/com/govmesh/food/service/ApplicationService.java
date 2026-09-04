@@ -384,43 +384,41 @@ public class ApplicationService {
             throw new SoapServiceException("VALIDATION_FAILED", "Address element is required and cannot be blank.");
         }
 
-        // Perform Transactional Update of Master Ration Record
-        record.setHouseAddress(command.getAddress());
-        record.setUpdateStatus("UPDATED");
+        // Update Master Ration Record state to PENDING scrutiny
+        record.setUpdateStatus("PENDING");
         rationRecordRepository.save(record);
 
         auditLogRepository.save(AuditLog.builder()
                 .timestamp(LocalDateTime.now())
                 .applicationId(app.getApplicationId())
                 .officerId(null)
-                .action("RATION_RECORD_UPDATED")
+                .action("RATION_RECORD_QUEUED")
                 .result("SUCCESS")
-                .description("Updated house address for Ration Card " + record.getRationCardNo() + " to: " + command.getAddress() + " via SOAP Web Service")
+                .description("Queued address update for Ration Card " + record.getRationCardNo() + " (Pending Officer Review) via SOAP Web Service")
                 .build());
 
-        // Perform Update of Application Record
-        String nowIso = Instant.now().toString();
-        app.setCurrentStatus("APPROVED");
-        app.setCompletedAt(nowIso);
+        // Update Application Record to PENDING state (Human-In-The-Loop)
+        app.setCurrentStatus("PENDING");
+        app.setCompletedAt(null);
         app.setRequestedAddress(command.getAddress());
-        app.setOfficerComments("Approved via GovMesh SOAP Interoperability Interface (Consent: " + command.getConsentId() + ", Correlation: " + corrId + ")");
-        app.setReviewedByOfficer("SOAP_INTEROP_GATEWAY");
+        app.setOfficerComments("Ingested via SOAP Web Service. Awaiting departmental officer review.");
+        app.setReviewedByOfficer(null);
         applicationRepository.save(app);
 
-        // Audit Log: SOAP Processing Success
+        // Audit Log: SOAP Ingestion Success
         auditLogRepository.save(AuditLog.builder()
                 .timestamp(LocalDateTime.now())
                 .applicationId(app.getApplicationId())
                 .officerId(null)
-                .action("SOAP_PROCESSING_SUCCESS")
+                .action("SOAP_INGESTION_SUCCESS")
                 .result("SUCCESS")
-                .description("Address update request " + app.getApplicationId() + " processed successfully via SOAP (CorrelationId: " + corrId + ")")
+                .description("Address update request " + app.getApplicationId() + " queued for officer scrutiny via SOAP (CorrelationId: " + corrId + ")")
                 .build());
 
         return SoapResultDTO.builder()
                 .applicationId(app.getApplicationId())
                 .status("SUCCESS")
-                .message("Ration address update processed successfully")
+                .message("Ration address update request accepted and queued for officer review.")
                 .correlationId(corrId)
                 .build();
     }
