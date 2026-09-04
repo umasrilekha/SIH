@@ -80,7 +80,7 @@ public class GovMeshConsentValidationTest {
         };
 
         integrationRouter = new IntegrationRouter(foodDepartmentAdapter, "http://localhost:8080/ws");
-        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService, applicationRepository, rationRecordRepository);
+        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService, applicationRepository, rationRecordRepository, consentRepository);
 
         LocalDateTime now = LocalDateTime.now();
 

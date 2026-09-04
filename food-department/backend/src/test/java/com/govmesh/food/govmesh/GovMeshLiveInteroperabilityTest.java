@@ -121,7 +121,8 @@ public class GovMeshLiveInteroperabilityTest {
                 auditLogRepository,
                 consentValidationService,
                 applicationRepository,
-                rationRecordRepository
+                rationRecordRepository,
+                consentRepository
         );
 
         controller = new GovMeshIntegrationController(interoperabilityService, VALID_API_KEY);

@@ -42,34 +42,18 @@ public class ConsentValidationService {
         }
 
         Optional<Consent> consentOpt = consentRepository.findByConsentId(consentId);
-        Consent consent;
         if (consentOpt.isEmpty()) {
-            if (consentId != null && (consentId.startsWith("CONSENT-") || consentId.startsWith("CNS-"))) {
-                consent = Consent.builder()
-                        .consentId(consentId)
-                        .citizenReference("CIT-GEN")
-                        .requestingDepartment(requestingDepartment != null ? requestingDepartment : "REVENUE")
-                        .receivingDepartment(receivingDepartment != null ? receivingDepartment : "FOOD")
-                        .purpose(purpose != null ? purpose : "RATION_ADDRESS_UPDATE")
-                        .status("ACTIVE")
-                        .issuedAt(now)
-                        .expiresAt(now.plusDays(30))
-                        .build();
-                consent = consentRepository.save(consent);
-            } else {
-                return ConsentValidationResult.builder()
-                        .status("BLOCKED")
-                        .reason("CONSENT_NOT_FOUND")
-                        .consentId(consentId)
-                        .purpose(purpose)
-                        .requestedFields(requestedFields)
-                        .allowedFields(consentPolicyService.getAllowedFields(purpose))
-                        .timestamp(now)
-                        .build();
-            }
-        } else {
-            consent = consentOpt.get();
+            return ConsentValidationResult.builder()
+                    .status("BLOCKED")
+                    .reason("CONSENT_NOT_FOUND")
+                    .consentId(consentId)
+                    .purpose(purpose)
+                    .requestedFields(requestedFields)
+                    .allowedFields(consentPolicyService.getAllowedFields(purpose))
+                    .timestamp(now)
+                    .build();
         }
+        Consent consent = consentOpt.get();
 
         // RULE 2 — CONSENT MUST BELONG TO THE REQUEST
         if (!isDepartmentMatch(requestingDepartment, consent.getRequestingDepartment()) ||

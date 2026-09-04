@@ -108,7 +108,7 @@ public class GovMeshIntegrationTest {
         };
 
         integrationRouter = new IntegrationRouter(foodAdapter, "http://localhost:8080/ws");
-        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService, applicationRepository, rationRecordRepository);
+        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService, applicationRepository, rationRecordRepository, consentRepository);
 
         sampleRecord = RationRecord.builder()
                 .id(1L)
