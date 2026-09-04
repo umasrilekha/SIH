@@ -8,6 +8,7 @@ import com.govmesh.food.entity.Notification;
 import com.govmesh.food.entity.RationRecord;
 import com.govmesh.food.exception.ResourceNotFoundException;
 import com.govmesh.food.exception.UnauthorizedException;
+import com.govmesh.food.govmesh.service.FoodCallbackService;
 import com.govmesh.food.repository.ApplicationRepository;
 import com.govmesh.food.repository.AuditLogRepository;
 import com.govmesh.food.repository.NotificationRepository;
@@ -19,6 +20,7 @@ import com.govmesh.food.soap.exception.SoapServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,15 +32,18 @@ public class ApplicationService {
     private final RationRecordRepository rationRecordRepository;
     private final AuditLogRepository auditLogRepository;
     private final NotificationRepository notificationRepository;
+    private final FoodCallbackService foodCallbackService;
 
     public ApplicationService(ApplicationRepository applicationRepository,
                               RationRecordRepository rationRecordRepository,
                               AuditLogRepository auditLogRepository,
-                              NotificationRepository notificationRepository) {
+                              NotificationRepository notificationRepository,
+                              FoodCallbackService foodCallbackService) {
         this.applicationRepository = applicationRepository;
         this.rationRecordRepository = rationRecordRepository;
         this.auditLogRepository = auditLogRepository;
         this.notificationRepository = notificationRepository;
+        this.foodCallbackService = foodCallbackService;
     }
 
     public List<ApplicationDTO> getApplications(String query, String status, String type) {
@@ -88,23 +93,41 @@ public class ApplicationService {
         Application app = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found with ID: " + id));
 
-        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus()) || "REJECTED".equalsIgnoreCase(app.getCurrentStatus())) {
-            throw new IllegalStateException("Application " + app.getApplicationId() + " has already been processed and cannot be reviewed.");
+        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus()) || "REJECTED".equalsIgnoreCase(app.getCurrentStatus()) || "COMPLETED".equalsIgnoreCase(app.getCurrentStatus())) {
+            throw new IllegalStateException("Application " + app.getApplicationId() + " has already been finalized and cannot be reviewed.");
         }
 
+        String nowIso = Instant.now().toString();
         app.setCurrentStatus("UNDER_REVIEW");
-        app.setReviewedByOfficer(currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername());
+        app.setProcessingStartedAt(nowIso);
+        app.setReviewedByOfficer(currentUser != null ? (currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername()) : "OFFICER-FOOD");
         Application saved = applicationRepository.save(app);
 
         // Audit Log
         auditLogRepository.save(AuditLog.builder()
                 .timestamp(LocalDateTime.now())
                 .applicationId(app.getApplicationId())
-                .officerId(currentUser.getId())
+                .officerId(currentUser != null ? currentUser.getId() : null)
                 .action("APPLICATION_REVIEW_STARTED")
                 .result("SUCCESS")
-                .description("Officer " + currentUser.getUsername() + " started review for application " + app.getApplicationId())
+                .description("Officer " + (currentUser != null ? currentUser.getUsername() : "system") + " started review for application " + app.getApplicationId())
                 .build());
+
+        // Dispatch status callback to GovMesh Core
+        foodCallbackService.dispatchStatusCallback(
+                app.getApplicationId(),
+                app.getCorrelationId(),
+                app.getRequestVersion(),
+                "PROCESSING",
+                app.getAcknowledgementId(),
+                app.getReceivedAt(),
+                app.getValidatedAt(),
+                app.getAcceptedAt(),
+                app.getProcessingStartedAt(),
+                app.getCompletedAt(),
+                app.getCanonicalRequestHash(),
+                app.getDocumentHash()
+        );
 
         return getApplicationById(saved.getId());
     }
@@ -116,7 +139,7 @@ public class ApplicationService {
         Application app = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found with ID: " + id));
 
-        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus())) {
+        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus()) || "COMPLETED".equalsIgnoreCase(app.getCurrentStatus())) {
             throw new IllegalStateException("Application " + app.getApplicationId() + " has already been approved.");
         }
         if ("REJECTED".equalsIgnoreCase(app.getCurrentStatus())) {
@@ -126,9 +149,9 @@ public class ApplicationService {
         // Transactional update of RationRecord if ADDRESS_UPDATE
         if (app.getRationCardNo() != null) {
             RationRecord record = rationRecordRepository.findByRationCardNo(app.getRationCardNo())
-                    .orElseThrow(() -> new ResourceNotFoundException("Linked Ration Card Record not found: " + app.getRationCardNo()));
+                    .orElse(null);
 
-            if (app.getRequestedAddress() != null && !app.getRequestedAddress().isBlank()) {
+            if (record != null && app.getRequestedAddress() != null && !app.getRequestedAddress().isBlank()) {
                 record.setHouseAddress(app.getRequestedAddress());
                 record.setUpdateStatus("UPDATED");
                 rationRecordRepository.save(record);
@@ -136,7 +159,7 @@ public class ApplicationService {
                 auditLogRepository.save(AuditLog.builder()
                         .timestamp(LocalDateTime.now())
                         .applicationId(app.getApplicationId())
-                        .officerId(currentUser.getId())
+                        .officerId(currentUser != null ? currentUser.getId() : null)
                         .action("RATION_RECORD_UPDATED")
                         .result("SUCCESS")
                         .description("Updated house address for Ration Card " + record.getRationCardNo() + " to: " + app.getRequestedAddress())
@@ -144,30 +167,50 @@ public class ApplicationService {
             }
         }
 
+        String nowIso = Instant.now().toString();
         app.setCurrentStatus("APPROVED");
-        app.setOfficerComments(comments != null ? comments : "Address update approved after departmental verification.");
-        app.setReviewedByOfficer(currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername());
+        app.setCompletedAt(nowIso);
+        app.setOfficerComments(comments != null ? comments : "Address update approved after departmental scrutiny.");
+        app.setReviewedByOfficer(currentUser != null ? (currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername()) : "OFFICER-FOOD");
         Application saved = applicationRepository.save(app);
 
         // Audit Log
         auditLogRepository.save(AuditLog.builder()
                 .timestamp(LocalDateTime.now())
                 .applicationId(app.getApplicationId())
-                .officerId(currentUser.getId())
+                .officerId(currentUser != null ? currentUser.getId() : null)
                 .action("APPLICATION_APPROVED")
                 .result("SUCCESS")
-                .description("Application " + app.getApplicationId() + " approved by officer " + currentUser.getUsername())
+                .description("Application " + app.getApplicationId() + " approved by officer " + (currentUser != null ? currentUser.getUsername() : "system"))
                 .build());
 
         // Notification
-        notificationRepository.save(Notification.builder()
-                .recipientUserId(currentUser.getId())
-                .title("Application Approved")
-                .message("Address update request " + app.getApplicationId() + " has been approved successfully.")
-                .type("REQUEST")
-                .isRead(false)
-                .createdAt(LocalDateTime.now())
-                .build());
+        if (currentUser != null && currentUser.getId() != null) {
+            notificationRepository.save(Notification.builder()
+                    .recipientUserId(currentUser.getId())
+                    .title("Application Approved")
+                    .message("Address update request " + app.getApplicationId() + " has been approved successfully.")
+                    .type("REQUEST")
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        // Dispatch status callback to GovMesh Core
+        foodCallbackService.dispatchStatusCallback(
+                app.getApplicationId(),
+                app.getCorrelationId(),
+                app.getRequestVersion(),
+                "COMPLETED",
+                app.getAcknowledgementId(),
+                app.getReceivedAt(),
+                app.getValidatedAt(),
+                app.getAcceptedAt(),
+                app.getProcessingStartedAt(),
+                app.getCompletedAt(),
+                app.getCanonicalRequestHash(),
+                app.getDocumentHash()
+        );
 
         return getApplicationById(saved.getId());
     }
@@ -183,34 +226,54 @@ public class ApplicationService {
         Application app = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found with ID: " + id));
 
-        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus()) || "REJECTED".equalsIgnoreCase(app.getCurrentStatus())) {
+        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus()) || "COMPLETED".equalsIgnoreCase(app.getCurrentStatus()) || "REJECTED".equalsIgnoreCase(app.getCurrentStatus())) {
             throw new IllegalStateException("Application " + app.getApplicationId() + " is already in terminal state " + app.getCurrentStatus());
         }
 
+        String nowIso = Instant.now().toString();
         app.setCurrentStatus("REJECTED");
+        app.setCompletedAt(nowIso);
         app.setOfficerComments(reason);
-        app.setReviewedByOfficer(currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername());
+        app.setReviewedByOfficer(currentUser != null ? (currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername()) : "OFFICER-FOOD");
         Application saved = applicationRepository.save(app);
 
         // Audit Log (Ration Record remains UNCHANGED)
         auditLogRepository.save(AuditLog.builder()
                 .timestamp(LocalDateTime.now())
                 .applicationId(app.getApplicationId())
-                .officerId(currentUser.getId())
+                .officerId(currentUser != null ? currentUser.getId() : null)
                 .action("APPLICATION_REJECTED")
                 .result("SUCCESS")
                 .description("Application " + app.getApplicationId() + " rejected. Reason: " + reason)
                 .build());
 
         // Notification
-        notificationRepository.save(Notification.builder()
-                .recipientUserId(currentUser.getId())
-                .title("Application Rejected")
-                .message("Address update request " + app.getApplicationId() + " rejected. Reason: " + reason)
-                .type("ALERT")
-                .isRead(false)
-                .createdAt(LocalDateTime.now())
-                .build());
+        if (currentUser != null && currentUser.getId() != null) {
+            notificationRepository.save(Notification.builder()
+                    .recipientUserId(currentUser.getId())
+                    .title("Application Rejected")
+                    .message("Address update request " + app.getApplicationId() + " rejected. Reason: " + reason)
+                    .type("ALERT")
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        // Dispatch status callback to GovMesh Core
+        foodCallbackService.dispatchStatusCallback(
+                app.getApplicationId(),
+                app.getCorrelationId(),
+                app.getRequestVersion(),
+                "REJECTED",
+                app.getAcknowledgementId(),
+                app.getReceivedAt(),
+                app.getValidatedAt(),
+                app.getAcceptedAt(),
+                app.getProcessingStartedAt(),
+                app.getCompletedAt(),
+                app.getCanonicalRequestHash(),
+                app.getDocumentHash()
+        );
 
         return getApplicationById(saved.getId());
     }
@@ -225,34 +288,52 @@ public class ApplicationService {
         Application app = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found with ID: " + id));
 
-        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus()) || "REJECTED".equalsIgnoreCase(app.getCurrentStatus())) {
+        if ("APPROVED".equalsIgnoreCase(app.getCurrentStatus()) || "COMPLETED".equalsIgnoreCase(app.getCurrentStatus()) || "REJECTED".equalsIgnoreCase(app.getCurrentStatus())) {
             throw new IllegalStateException("Cannot request information for completed/rejected application " + app.getApplicationId());
         }
 
         app.setCurrentStatus("INFORMATION_REQUIRED");
         app.setOfficerComments(comments);
-        app.setReviewedByOfficer(currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername());
+        app.setReviewedByOfficer(currentUser != null ? (currentUser.getEmployeeId() != null ? currentUser.getEmployeeId() : currentUser.getUsername()) : "OFFICER-FOOD");
         Application saved = applicationRepository.save(app);
 
         // Audit Log
         auditLogRepository.save(AuditLog.builder()
                 .timestamp(LocalDateTime.now())
                 .applicationId(app.getApplicationId())
-                .officerId(currentUser.getId())
+                .officerId(currentUser != null ? currentUser.getId() : null)
                 .action("INFORMATION_REQUESTED")
                 .result("SUCCESS")
                 .description("Requested additional information for " + app.getApplicationId() + ": " + comments)
                 .build());
 
         // Notification
-        notificationRepository.save(Notification.builder()
-                .recipientUserId(currentUser.getId())
-                .title("Information Requested")
-                .message("Additional details requested for application " + app.getApplicationId())
-                .type("REQUEST")
-                .isRead(false)
-                .createdAt(LocalDateTime.now())
-                .build());
+        if (currentUser != null && currentUser.getId() != null) {
+            notificationRepository.save(Notification.builder()
+                    .recipientUserId(currentUser.getId())
+                    .title("Information Requested")
+                    .message("Additional details requested for application " + app.getApplicationId())
+                    .type("REQUEST")
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        // Dispatch status callback to GovMesh Core
+        foodCallbackService.dispatchStatusCallback(
+                app.getApplicationId(),
+                app.getCorrelationId(),
+                app.getRequestVersion(),
+                "ACTION_REQUIRED",
+                app.getAcknowledgementId(),
+                app.getReceivedAt(),
+                app.getValidatedAt(),
+                app.getAcceptedAt(),
+                app.getProcessingStartedAt(),
+                app.getCompletedAt(),
+                app.getCanonicalRequestHash(),
+                app.getDocumentHash()
+        );
 
         return getApplicationById(saved.getId());
     }
@@ -335,7 +416,9 @@ public class ApplicationService {
                 .build());
 
         // Perform Update of Application Record
+        String nowIso = Instant.now().toString();
         app.setCurrentStatus("APPROVED");
+        app.setCompletedAt(nowIso);
         app.setRequestedAddress(command.getAddress());
         app.setOfficerComments("Approved via GovMesh SOAP Interoperability Interface (Consent: " + command.getConsentId() + ", Correlation: " + corrId + ")");
         app.setReviewedByOfficer("SOAP_INTEROP_GATEWAY");
@@ -367,13 +450,13 @@ public class ApplicationService {
     }
 
     private void verifyNotAuditor(UserPrincipal currentUser) {
-        if ("AUDITOR".equalsIgnoreCase(currentUser.getRole())) {
+        if (currentUser != null && "AUDITOR".equalsIgnoreCase(currentUser.getRole())) {
             throw new UnauthorizedException("Auditor role has read-only privileges and cannot perform application action operations.");
         }
     }
 
     private void verifySeniorOrAdmin(UserPrincipal currentUser) {
-        if (!"SENIOR_OFFICER".equalsIgnoreCase(currentUser.getRole()) && !"DEPARTMENT_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+        if (currentUser != null && !"SENIOR_OFFICER".equalsIgnoreCase(currentUser.getRole()) && !"DEPARTMENT_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             throw new UnauthorizedException("Only Senior Officers or Department Admins have authorization to approve or reject applications.");
         }
     }
@@ -382,6 +465,8 @@ public class ApplicationService {
         return ApplicationDTO.builder()
                 .id(app.getId())
                 .applicationId(app.getApplicationId())
+                .correlationId(app.getCorrelationId())
+                .requestVersion(app.getRequestVersion())
                 .citizenReference(app.getCitizenReference())
                 .rationCardNo(app.getRationCardNo())
                 .applicationType(app.getApplicationType())
@@ -390,6 +475,22 @@ public class ApplicationService {
                 .requestedAddress(app.getRequestedAddress())
                 .officerComments(app.getOfficerComments())
                 .reviewedByOfficer(app.getReviewedByOfficer())
+                .canonicalRequestHash(app.getCanonicalRequestHash())
+                .documentHash(app.getDocumentHash())
+                .hashStatus(app.getHashStatus())
+                .documentId(app.getDocumentId())
+                .documentName(app.getDocumentName())
+                .documentType(app.getDocumentType())
+                .documentSize(app.getDocumentSize())
+                .consentId(app.getConsentId())
+                .acknowledgementId(app.getAcknowledgementId())
+                .sentAt(app.getSentAt())
+                .receivedAt(app.getReceivedAt())
+                .validatedAt(app.getValidatedAt())
+                .acceptedAt(app.getAcceptedAt())
+                .processingStartedAt(app.getProcessingStartedAt())
+                .completedAt(app.getCompletedAt())
+                .rawSourceJson(app.getRawSourceJson())
                 .createdAt(app.getCreatedAt())
                 .updatedAt(app.getUpdatedAt())
                 .build();

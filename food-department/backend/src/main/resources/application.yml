@@ -25,6 +25,8 @@ spring:
         dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
 
 govmesh:
+  api-key: ${GOVMESH_API_KEY:gm-secret-key-2026-interop}
+  callback-url: ${GOVMESH_CALLBACK_URL:https://sih-26129-gov-mesh-citizen.vercel.app/api/govmesh/callbacks/department-status}
   food:
     soap:
       endpoint-url: ${SOAP_ENDPOINT_URL:http://localhost:${server.port:8081}/ws}

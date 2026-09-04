@@ -34,6 +34,10 @@ public class FoodDepartmentSoapEndpointTest {
     @Mock
     private AuditLogRepository auditLogRepository;
 
+    @Mock
+    private com.govmesh.food.repository.NotificationRepository notificationRepository;
+
+    private com.govmesh.food.govmesh.service.FoodCallbackService foodCallbackService;
     private ApplicationService applicationService;
     private FoodDepartmentSoapEndpoint soapEndpoint;
 
@@ -43,7 +47,13 @@ public class FoodDepartmentSoapEndpointTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        applicationService = new ApplicationService(applicationRepository, rationRecordRepository, auditLogRepository, mock());
+        foodCallbackService = new com.govmesh.food.govmesh.service.FoodCallbackService("http://localhost:9999/callback") {
+            @Override
+            public void dispatchStatusCallback(String applicationId, String correlationId, Integer requestVersion, String status, String acknowledgementId, String receivedAt, String validatedAt, String acceptedAt, String processingStartedAt, String completedAt, String canonicalRequestHash, String documentHash) {
+                // no-op for tests
+            }
+        };
+        applicationService = new ApplicationService(applicationRepository, rationRecordRepository, auditLogRepository, notificationRepository, foodCallbackService);
         soapEndpoint = new FoodDepartmentSoapEndpoint(applicationService);
 
         sampleRecord = RationRecord.builder()

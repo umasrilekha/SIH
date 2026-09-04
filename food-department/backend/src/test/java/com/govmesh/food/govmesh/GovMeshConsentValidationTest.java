@@ -39,6 +39,12 @@ public class GovMeshConsentValidationTest {
     @Mock
     private IntegrationTransactionRepository transactionRepository;
 
+    @Mock
+    private com.govmesh.food.repository.ApplicationRepository applicationRepository;
+
+    @Mock
+    private com.govmesh.food.repository.RationRecordRepository rationRecordRepository;
+
     private ConsentPolicyService consentPolicyService;
     private ConsentValidationService consentValidationService;
     private FoodDepartmentAdapter foodDepartmentAdapter;
@@ -74,7 +80,7 @@ public class GovMeshConsentValidationTest {
         };
 
         integrationRouter = new IntegrationRouter(foodDepartmentAdapter, "http://localhost:8080/ws");
-        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService);
+        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService, applicationRepository, rationRecordRepository);
 
         LocalDateTime now = LocalDateTime.now();
 

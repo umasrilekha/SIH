@@ -38,7 +38,7 @@ public class ApplicationServiceTest {
     @Mock
     private NotificationRepository notificationRepository;
 
-    @InjectMocks
+    private com.govmesh.food.govmesh.service.FoodCallbackService foodCallbackService;
     private ApplicationService applicationService;
 
     private UserPrincipal seniorOfficer;
@@ -49,6 +49,15 @@ public class ApplicationServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        foodCallbackService = new com.govmesh.food.govmesh.service.FoodCallbackService("http://localhost:9999/callback") {
+            @Override
+            public void dispatchStatusCallback(String applicationId, String correlationId, Integer requestVersion, String status, String acknowledgementId, String receivedAt, String validatedAt, String acceptedAt, String processingStartedAt, String completedAt, String canonicalRequestHash, String documentHash) {
+                // no-op for tests
+            }
+        };
+
+        applicationService = new ApplicationService(applicationRepository, rationRecordRepository, auditLogRepository, notificationRepository, foodCallbackService);
 
         User seniorUser = User.builder()
                 .id(1L)

@@ -16,6 +16,7 @@ import com.govmesh.food.repository.ApplicationRepository;
 import com.govmesh.food.repository.AuditLogRepository;
 import com.govmesh.food.repository.ConsentRepository;
 import com.govmesh.food.repository.IntegrationTransactionRepository;
+import com.govmesh.food.repository.NotificationRepository;
 import com.govmesh.food.repository.RationRecordRepository;
 import com.govmesh.food.service.ApplicationService;
 import com.govmesh.food.service.ConsentPolicyService;
@@ -50,6 +51,9 @@ public class GovMeshIntegrationTest {
     @Mock
     private ConsentRepository consentRepository;
 
+    @Mock
+    private NotificationRepository notificationRepository;
+
     private ConsentPolicyService consentPolicyService;
     private ConsentValidationService consentValidationService;
     private FoodDepartmentSchemaMapper schemaMapper;
@@ -70,7 +74,11 @@ public class GovMeshIntegrationTest {
         consentPolicyService = new ConsentPolicyService();
         consentValidationService = new ConsentValidationService(consentRepository, consentPolicyService);
         schemaMapper = new FoodDepartmentSchemaMapper(applicationRepository);
-        applicationService = new ApplicationService(applicationRepository, rationRecordRepository, auditLogRepository, mock());
+        com.govmesh.food.govmesh.service.FoodCallbackService callbackService = new com.govmesh.food.govmesh.service.FoodCallbackService("http://localhost:9999/callback") {
+            @Override
+            public void dispatchStatusCallback(String applicationId, String correlationId, Integer requestVersion, String status, String acknowledgementId, String receivedAt, String validatedAt, String acceptedAt, String processingStartedAt, String completedAt, String canonicalRequestHash, String documentHash) {}
+        };
+        applicationService = new ApplicationService(applicationRepository, rationRecordRepository, auditLogRepository, notificationRepository, callbackService);
         soapEndpoint = new FoodDepartmentSoapEndpoint(applicationService);
 
         foodAdapter = new FoodDepartmentAdapter(schemaMapper) {
@@ -100,7 +108,7 @@ public class GovMeshIntegrationTest {
         };
 
         integrationRouter = new IntegrationRouter(foodAdapter, "http://localhost:8080/ws");
-        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService);
+        interoperabilityService = new GovMeshInteroperabilityService(integrationRouter, transactionRepository, auditLogRepository, consentValidationService, applicationRepository, rationRecordRepository);
 
         sampleRecord = RationRecord.builder()
                 .id(1L)
@@ -177,8 +185,11 @@ public class GovMeshIntegrationTest {
     }
 
     @Test
-    void testEndToEndInteroperability_UnknownApplication_ReturnsFailed() {
+    void testEndToEndInteroperability_DynamicApplication_DynamicallyRegisteredAndAcknowledged() {
         when(applicationRepository.findByApplicationId("GM-2026-999999")).thenReturn(Optional.empty());
+        when(applicationRepository.save(any(Application.class))).thenAnswer(i -> i.getArgument(0));
+        when(rationRecordRepository.findByRationCardNo(anyString())).thenReturn(Optional.empty());
+        when(rationRecordRepository.save(any(RationRecord.class))).thenAnswer(i -> i.getArgument(0));
 
         CanonicalAddressUpdateRequest request = new CanonicalAddressUpdateRequest(
                 "GM-2026-999999",
@@ -194,8 +205,11 @@ public class GovMeshIntegrationTest {
         CanonicalAddressUpdateResponse response = interoperabilityService.processInteroperabilityRequest(request);
 
         assertNotNull(response);
-        assertEquals("FAILED", response.getStatus());
+        assertEquals("GM-2026-999999", response.getApplicationId());
+        assertEquals("SUCCESS", response.getStatus());
+        assertEquals("ACK-FOOD-GM-2026-999999", response.getAcknowledgementId());
         assertEquals("REQ-2026-999999", response.getCorrelationId());
+        verify(applicationRepository, atLeastOnce()).save(any(Application.class));
     }
 
     @Test

@@ -141,15 +141,32 @@ export const RequestsPage: React.FC = () => {
               <tbody className="divide-y divide-slate-200">
                 {applications.map((app) => (
                   <tr key={app.id} className="hover:bg-slate-50 transition">
-                    <td className="py-2 px-3 font-mono font-bold text-slate-900">{app.applicationId}</td>
+                    <td className="py-2 px-3">
+                      <div className="font-mono font-bold text-slate-900">{app.applicationId}</div>
+                      {app.correlationId && (
+                        <div className="text-[10px] text-blue-700 font-mono mt-0.5 flex items-center gap-1">
+                          <span className="px-1 py-0.2 bg-blue-50 border border-blue-200 rounded text-[9px] font-semibold">GovMesh</span>
+                          <span className="truncate max-w-[130px]">{app.correlationId}</span>
+                        </div>
+                      )}
+                    </td>
                     <td className="py-2 px-3 font-mono text-slate-600">{app.citizenReference}</td>
                     <td className="py-2 px-3 font-mono text-slate-800 font-semibold">{app.rationCardNo}</td>
                     <td className="py-2 px-3 text-slate-700 font-medium">{app.applicationType.replace(/_/g, ' ')}</td>
-                    <td className="py-2 px-3 text-slate-700 font-bold">{app.sourceDepartment}</td>
+                    <td className="py-2 px-3">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300">
+                        {app.sourceDepartment}
+                      </span>
+                    </td>
                     <td className="py-2 px-3">
                       <StatusBadge status={app.currentStatus} />
                     </td>
-                    <td className="py-2 px-3 text-slate-500 whitespace-nowrap">{formatDate(app.createdAt)}</td>
+                    <td className="py-2 px-3 text-slate-500 whitespace-nowrap">
+                      <div>{formatDate(app.receivedAt || app.createdAt)}</div>
+                      {app.receivedAt && (
+                        <div className="text-[9px] font-mono text-emerald-700">✓ Auth Ingress</div>
+                      )}
+                    </td>
                     <td className="py-2 px-3 text-right">
                       <Link
                         to={`/applications/${app.id}`}

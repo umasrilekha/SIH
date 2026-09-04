@@ -48,6 +48,24 @@ export interface Application {
   requestedAddress?: string;
   officerComments?: string;
   reviewedByOfficer?: string;
+  correlationId?: string;
+  requestVersion?: string;
+  canonicalRequestHash?: string;
+  documentHash?: string;
+  hashStatus?: string;
+  documentId?: string;
+  documentName?: string;
+  documentType?: string;
+  documentSize?: number;
+  consentId?: string;
+  acknowledgementId?: string;
+  sentAt?: string;
+  receivedAt?: string;
+  validatedAt?: string;
+  acceptedAt?: string;
+  processingStartedAt?: string;
+  completedAt?: string;
+  rawSourceJson?: string;
   createdAt: string;
   updatedAt: string;
 }
