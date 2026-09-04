@@ -56,9 +56,11 @@ export const IntegrationMonitorPage: React.FC = () => {
       source: 'REVENUE',
     };
 
+    const dynamicAppId = `GM-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+
     if (scenario === 'valid') {
       reqPayload = {
-        applicationId: 'GM-2026-000124',
+        applicationId: dynamicAppId,
         sourceDepartment: 'REVENUE',
         targetDepartment: 'FOOD',
         correlationId: `REQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -66,11 +68,11 @@ export const IntegrationMonitorPage: React.FC = () => {
         requestedFields: ['citizen.name', 'citizen.address', 'citizen.address.district', 'citizen.address.taluka', 'verification.status'],
         citizen: baseCitizen,
         verification: baseVerification,
-        consent: { id: 'CONSENT-00124' },
+        consent: { id: `CONSENT-${Math.floor(10000 + Math.random() * 90000)}` },
       };
     } else if (scenario === 'expired') {
       reqPayload = {
-        applicationId: 'GM-2026-000124',
+        applicationId: dynamicAppId,
         sourceDepartment: 'REVENUE',
         targetDepartment: 'FOOD',
         correlationId: `REQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -82,7 +84,7 @@ export const IntegrationMonitorPage: React.FC = () => {
       };
     } else if (scenario === 'revoked') {
       reqPayload = {
-        applicationId: 'GM-2026-000124',
+        applicationId: dynamicAppId,
         sourceDepartment: 'REVENUE',
         targetDepartment: 'FOOD',
         correlationId: `REQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -94,7 +96,7 @@ export const IntegrationMonitorPage: React.FC = () => {
       };
     } else if (scenario === 'purpose') {
       reqPayload = {
-        applicationId: 'GM-2026-000124',
+        applicationId: dynamicAppId,
         sourceDepartment: 'REVENUE',
         targetDepartment: 'FOOD',
         correlationId: `REQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -102,11 +104,11 @@ export const IntegrationMonitorPage: React.FC = () => {
         requestedFields: ['citizen.name', 'citizen.address'],
         citizen: baseCitizen,
         verification: baseVerification,
-        consent: { id: 'CONSENT-00124' },
+        consent: { id: `CONSENT-${Math.floor(10000 + Math.random() * 90000)}` },
       };
     } else if (scenario === 'field') {
       reqPayload = {
-        applicationId: 'GM-2026-000124',
+        applicationId: dynamicAppId,
         sourceDepartment: 'REVENUE',
         targetDepartment: 'FOOD',
         correlationId: `REQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -114,12 +116,12 @@ export const IntegrationMonitorPage: React.FC = () => {
         requestedFields: ['citizen.name', 'citizen.address', 'citizen.phone'],
         citizen: baseCitizen,
         verification: baseVerification,
-        consent: { id: 'CONSENT-00124' },
+        consent: { id: `CONSENT-${Math.floor(10000 + Math.random() * 90000)}` },
       };
     } else {
       // party mismatch
       reqPayload = {
-        applicationId: 'GM-2026-000124',
+        applicationId: dynamicAppId,
         sourceDepartment: 'PANCHAYAT',
         targetDepartment: 'FOOD',
         correlationId: `REQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -127,7 +129,7 @@ export const IntegrationMonitorPage: React.FC = () => {
         requestedFields: ['citizen.name', 'citizen.address'],
         citizen: baseCitizen,
         verification: baseVerification,
-        consent: { id: 'CONSENT-00124' },
+        consent: { id: `CONSENT-${Math.floor(10000 + Math.random() * 90000)}` },
       };
     }
 

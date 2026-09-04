@@ -1,4 +1,6 @@
 {
+  "buildCommand": "cd food-department/frontend && npm run build",
+  "outputDirectory": "food-department/frontend/dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
