@@ -24,7 +24,7 @@ INSERT INTO users (id, username, password_hash, full_name, role, department, emp
 
 -- 2. RATION RECORDS (20 Records)
 INSERT INTO ration_records (id, ration_card_no, holder_name, house_address, taluka_code, district_code, verification_flag, update_status, created_at, updated_at) VALUES
-(1, 'MH12-2026-000124', 'Rajesh Kumar', '12, M.G. Road, Shivajinagar, Pune', 'TAL-PUN-04', 'DIST-PUN', true, 'ACTIVE', NOW() - INTERVAL '30 days', NOW()),
+(1, 'MH12-2026-000124', 'Rajesh Shantaram Patil', 'Flat 201, Shanti Niketan, Prabhat Road, Deccan Gymkhana, Haveli, Pune - 411004', 'TAL-HAV-02', 'DIST-PUN', true, 'ACTIVE', NOW() - INTERVAL '30 days', NOW()),
 (2, 'MH12-2026-000125', 'Aarti Suresh Patil', '45, Lakshmi Chowk, Chinchwad, Pune', 'TAL-HAV-02', 'DIST-PUN', true, 'ACTIVE', NOW() - INTERVAL '29 days', NOW()),
 (3, 'MH14-2026-000126', 'Ganesh Ramchandra Kulkarni', '88, Station Road, Pimpri, Pune', 'TAL-HAV-02', 'DIST-PUN', true, 'ACTIVE', NOW() - INTERVAL '28 days', NOW()),
 (4, 'MH12-2026-000127', 'Savita Vilas Shinde', '101, Anand Nagar, Kothrud, Pune', 'TAL-PUN-04', 'DIST-PUN', false, 'PENDING_VERIFICATION', NOW() - INTERVAL '27 days', NOW()),
@@ -47,7 +47,7 @@ INSERT INTO ration_records (id, ration_card_no, holder_name, house_address, talu
 
 -- 3. APPLICATIONS (15 Interoperability Update Requests)
 INSERT INTO applications (id, application_id, citizen_reference, ration_card_no, application_type, current_status, source_department, created_at, updated_at) VALUES
-(1, 'GM-2026-000124', 'CIT-MH-998811', 'MH12-2026-000124', 'ADDRESS_UPDATE', 'PENDING', 'REVENUE', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '2 hours'),
+(1, 'GM-2026-000124', 'CIT-MH-1001', 'MH12-2026-000124', 'ADDRESS_UPDATE', 'PENDING', 'REVENUE', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '2 hours'),
 (2, 'GM-2026-000101', 'CIT-MH-998801', 'MH12-2026-000125', 'ADDRESS_UPDATE', 'PROCESSING', 'REVENUE', NOW() - INTERVAL '5 hours', NOW() - INTERVAL '4 hours'),
 (3, 'GM-2026-000102', 'CIT-MH-998802', 'MH14-2026-000126', 'MEMBER_ADDITION', 'COMPLETED', 'REVENUE', NOW() - INTERVAL '1 day', NOW() - INTERVAL '12 hours'),
 (4, 'GM-2026-000103', 'CIT-MH-998803', 'MH12-2026-000127', 'ADDRESS_UPDATE', 'PENDING', 'REVENUE', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),

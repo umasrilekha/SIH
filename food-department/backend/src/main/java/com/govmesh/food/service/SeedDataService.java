@@ -105,7 +105,7 @@ public class SeedDataService {
 
         // 2. Seed Ration Records (20)
         List<RationRecord> rationRecords = Arrays.asList(
-                RationRecord.builder().rationCardNo("MH12-2026-000124").holderName("Rajesh Kumar").houseAddress("12, M.G. Road, Shivajinagar, Pune").talukaCode("TAL-PUN-04").districtCode("DIST-PUN").verificationFlag(true).updateStatus("ACTIVE").build(),
+                RationRecord.builder().rationCardNo("MH12-2026-000124").holderName("Rajesh Shantaram Patil").houseAddress("Flat 201, Shanti Niketan, Prabhat Road, Deccan Gymkhana, Haveli, Pune - 411004").talukaCode("TAL-HAV-02").districtCode("DIST-PUN").verificationFlag(true).updateStatus("ACTIVE").build(),
                 RationRecord.builder().rationCardNo("MH12-2026-000125").holderName("Aarti Suresh Patil").houseAddress("45, Lakshmi Chowk, Chinchwad, Pune").talukaCode("TAL-HAV-02").districtCode("DIST-PUN").verificationFlag(true).updateStatus("ACTIVE").build(),
                 RationRecord.builder().rationCardNo("MH14-2026-000126").holderName("Ganesh Ramchandra Kulkarni").houseAddress("88, Station Road, Pimpri, Pune").talukaCode("TAL-HAV-02").districtCode("DIST-PUN").verificationFlag(true).updateStatus("ACTIVE").build(),
                 RationRecord.builder().rationCardNo("MH12-2026-000127").holderName("Savita Vilas Shinde").houseAddress("101, Anand Nagar, Kothrud, Pune").talukaCode("TAL-PUN-04").districtCode("DIST-PUN").verificationFlag(false).updateStatus("PENDING_VERIFICATION").build(),
@@ -130,7 +130,7 @@ public class SeedDataService {
 
         // 3. Seed Applications (15) with realistic requestedAddress values
         List<Application> applications = Arrays.asList(
-                Application.builder().applicationId("GM-2026-000124").citizenReference("CIT-MH-998811").rationCardNo("MH12-2026-000124").applicationType("ADDRESS_UPDATE").currentStatus("PENDING").sourceDepartment("REVENUE").requestedAddress("44 Example Road, Shivajinagar, Pune - 411005").build(),
+                Application.builder().applicationId("GM-2026-000124").citizenReference("CIT-MH-1001").rationCardNo("MH12-2026-000124").applicationType("ADDRESS_UPDATE").currentStatus("PENDING").sourceDepartment("REVENUE").requestedAddress("Flat 402, Shivshankar Heights, Karve Road, Kothrud, Haveli, Pune - 411038").build(),
                 Application.builder().applicationId("GM-2026-000101").citizenReference("CIT-MH-998801").rationCardNo("MH12-2026-000125").applicationType("ADDRESS_UPDATE").currentStatus("UNDER_REVIEW").sourceDepartment("REVENUE").requestedAddress("99, Sector 21, Nigdi, Pimpri-Chinchwad, Pune - 411044").build(),
                 Application.builder().applicationId("GM-2026-000102").citizenReference("CIT-MH-998802").rationCardNo("MH14-2026-000126").applicationType("MEMBER_ADDITION").currentStatus("APPROVED").sourceDepartment("REVENUE").requestedAddress("88, Station Road, Pimpri, Pune").build(),
                 Application.builder().applicationId("GM-2026-000103").citizenReference("CIT-MH-998803").rationCardNo("MH12-2026-000127").applicationType("ADDRESS_UPDATE").currentStatus("PENDING").sourceDepartment("REVENUE").requestedAddress("205, Ideal Colony, Kothrud, Pune - 411038").build(),
