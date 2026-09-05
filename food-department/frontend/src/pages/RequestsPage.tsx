@@ -29,18 +29,17 @@ export const RequestsPage: React.FC = () => {
     }
     try {
       const data = await applicationService.getApplications(searchQuery, statusFilter, typeFilter);
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         const sorted = [...data].sort((a, b) => {
           if (a.applicationId === 'GM-2026-000124') return -1;
           if (b.applicationId === 'GM-2026-000124') return 1;
           return 0;
         });
         setApplications(sorted);
+        setError(null);
       }
     } catch (err: any) {
-      if (!isBackground) {
-        setError(err?.response?.data?.message || 'Failed to fetch incoming service requests.');
-      }
+      console.warn('Could not fetch from live API:', err);
     } finally {
       if (!isBackground) {
         setLoading(false);

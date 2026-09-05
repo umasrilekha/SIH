@@ -19,7 +19,7 @@ public class JwtUtils {
     @Value("${govmesh.jwt.secret:GovMeshFoodDept2026SuperSecretKeyDepartment2Maharashtra2026}")
     private String jwtSecret;
 
-    @Value("${govmesh.jwt.expiration-ms:1800000}")
+    @Value("${govmesh.jwt.expiration-ms:604800000}")
     private long jwtExpirationMs;
 
     private Key getSigningKey() {
