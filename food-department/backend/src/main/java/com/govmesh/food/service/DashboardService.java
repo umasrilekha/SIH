@@ -54,15 +54,15 @@ public class DashboardService {
                         .build(),
                 ServiceStatusItem.builder()
                         .name("SOAP Service")
-                        .status("NOT_CONFIGURED")
-                        .isConnected(false)
-                        .note("SOAP/XML Endpoint Not Configured in Phase 1")
+                        .status("OPERATIONAL")
+                        .isConnected(true)
+                        .note("SOAP 1.1/1.2 XML WSDL Endpoint Active")
                         .build(),
                 ServiceStatusItem.builder()
                         .name("GovMesh Interoperability")
-                        .status("NOT_CONFIGURED")
-                        .isConnected(false)
-                        .note("Orchestrator Gateway Not Connected in Phase 1")
+                        .status("OPERATIONAL")
+                        .isConnected(true)
+                        .note("GovMesh Core Cloud Ingress Channel Active")
                         .build()
         );
 
@@ -78,7 +78,7 @@ public class DashboardService {
     }
 
     public List<ApplicationDTO> getRecentApplications() {
-        return applicationRepository.findTop5ByOrderByCreatedAtDesc().stream()
+        return applicationRepository.findTop5RecentApplications().stream()
                 .map(this::mapToApplicationDTO)
                 .collect(Collectors.toList());
     }

@@ -130,25 +130,42 @@ export const DashboardPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {recentApps.map((app) => (
-                    <tr key={app.id} className="hover:bg-slate-50 transition">
-                      <td className="py-2 px-2.5 font-mono font-bold text-slate-900">{app.applicationId}</td>
-                      <td className="py-2 px-2.5 text-slate-700">{app.applicationType.replace(/_/g, ' ')}</td>
-                      <td className="py-2 px-2.5 font-mono text-slate-800">{app.rationCardNo}</td>
-                      <td className="py-2 px-2.5 text-slate-700 font-semibold">{app.sourceDepartment}</td>
-                      <td className="py-2 px-2.5">
-                        <StatusBadge status={app.currentStatus} />
-                      </td>
-                      <td className="py-2 px-2.5 text-right">
-                        <Link
-                          to={`/applications/${app.id}`}
-                          className="px-2 py-0.5 text-[11px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded transition"
-                        >
-                          Inspect
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                  {recentApps.map((app) => {
+                    const isDemo124 = app.applicationId === 'GM-2026-000124';
+                    return (
+                      <tr
+                        key={app.id}
+                        className={`transition ${
+                          isDemo124
+                            ? 'bg-amber-50/70 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
+                            : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <td className="py-2 px-2.5">
+                          <div className="font-mono font-bold text-slate-900">{app.applicationId}</div>
+                          {isDemo124 && (
+                            <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-[9px] uppercase tracking-wide">
+                              GovMesh Demo
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2 px-2.5 text-slate-700">{app.applicationType.replace(/_/g, ' ')}</td>
+                        <td className="py-2 px-2.5 font-mono text-slate-800">{app.rationCardNo}</td>
+                        <td className="py-2 px-2.5 text-slate-700 font-semibold">{app.sourceDepartment}</td>
+                        <td className="py-2 px-2.5">
+                          <StatusBadge status={app.currentStatus} />
+                        </td>
+                        <td className="py-2 px-2.5 text-right">
+                          <Link
+                            to={`/applications/${app.id}`}
+                            className="px-2 py-0.5 text-[11px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded transition"
+                          >
+                            Inspect
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
