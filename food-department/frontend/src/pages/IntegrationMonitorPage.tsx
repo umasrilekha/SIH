@@ -42,12 +42,12 @@ export const IntegrationMonitorPage: React.FC = () => {
     let reqPayload: CanonicalAddressUpdateRequest;
 
     const baseCitizen = {
-      reference: 'CIT-MH-998811',
-      name: 'Rajesh Kumar',
+      reference: 'CIT-MH-1001',
+      name: 'Rajesh Shantaram Patil',
       address: {
-        line: '44 Example Road, Shivajinagar, Pune - 411005',
+        line: 'Flat 402, Shivshankar Heights, Karve Road, Kothrud, Haveli, Pune - 411038',
         district: 'DIST-PUN',
-        taluka: 'TAL-PUN-04',
+        taluka: 'TAL-HAV-02',
       },
     };
 

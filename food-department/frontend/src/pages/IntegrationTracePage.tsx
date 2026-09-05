@@ -324,14 +324,14 @@ export const IntegrationTracePage: React.FC = () => {
   targetDepartment: transaction.targetDepartment,
   correlationId: transaction.correlationId,
   purpose: "RATION_ADDRESS_UPDATE",
-  consent: { id: transaction.consentId || "CONSENT-00124" },
+  consent: { id: transaction.consentId || "GM-CONSENT-2026-000124" },
   citizen: {
-    reference: "CIT-MH-998811",
-    name: "Rajesh Kumar",
+    reference: "CIT-MH-1001",
+    name: "Rajesh Shantaram Patil",
     address: {
-      line: "44 Example Road, Shivajinagar, Pune - 411005",
+      line: "Flat 402, Shivshankar Heights, Karve Road, Kothrud, Haveli, Pune - 411038",
       district: "DIST-PUN",
-      taluka: "TAL-PUN-04"
+      taluka: "TAL-HAV-02"
     }
   },
   verification: { status: "VALID", source: "REVENUE" }
@@ -345,7 +345,7 @@ export const IntegrationTracePage: React.FC = () => {
 {JSON.stringify({
   status: isBlocked ? "BLOCKED" : "ALLOWED",
   reason: isBlocked ? failureReason : "CONSENT_VALIDATED",
-  consentId: transaction.consentId || "CONSENT-00124",
+  consentId: transaction.consentId || "GM-CONSENT-2026-000124",
   purpose: "RATION_ADDRESS_UPDATE",
   requestedFields: [
     "citizen.name",
@@ -376,13 +376,13 @@ export const IntegrationTracePage: React.FC = () => {
    <soapenv:Body>
       <food:UpdateRationAddress>
          <food:ApplicationId>${transaction.applicationId}</food:ApplicationId>
-         <food:CitizenName>Rajesh Kumar</food:CitizenName>
+         <food:CitizenName>Rajesh Shantaram Patil</food:CitizenName>
          <food:RationCardNo>MH12-2026-000124</food:RationCardNo>
-         <food:Address>44 Example Road, Shivajinagar, Pune - 411005</food:Address>
+         <food:Address>Flat 402, Shivshankar Heights, Karve Road, Kothrud, Haveli, Pune - 411038</food:Address>
          <food:DistrictCode>DIST-PUN</food:DistrictCode>
-         <food:TalukaCode>TAL-PUN-04</food:TalukaCode>
+         <food:TalukaCode>TAL-HAV-02</food:TalukaCode>
          <food:RevenueVerified>true</food:RevenueVerified>
-         <food:ConsentId>${transaction.consentId || "CONSENT-00124"}</food:ConsentId>
+         <food:ConsentId>${transaction.consentId || "GM-CONSENT-2026-000124"}</food:ConsentId>
          <food:CorrelationId>${transaction.correlationId}</food:CorrelationId>
       </food:UpdateRationAddress>
    </soapenv:Body>
